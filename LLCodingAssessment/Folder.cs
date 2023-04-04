@@ -2,57 +2,55 @@
 namespace LLCodingAssessment
 {
     // Folder class that can contain Folders or Items (Nodes)
-    internal class Folder : Node
+    public class Folder : Node
     {
-        // Need to be able to add or delete items within a folder
-        // Add and delete folders
-        // Each folder can contain items or folders -> Nodes 
-
         public List<Node> Nodes { get; set; }
 
-        // Add a node to the folder 
-        public void AddNode(Node node)
+        public Folder(string name) : base(name)
         {
-            Nodes.Add(node);
+            Nodes = new List<Node>();
         }
 
-        // Remove a single node from the folder
-        public void RemoveNode(Node node)
+        public void AddItem(string name)
+        {
+            Nodes.Add(new Item(name));
+        }
+
+        public void AddFolder(string name)
+        {
+            Nodes.Add(new Folder(name));
+        }
+
+        public void DeleteNode(Node node)
         {
             Nodes.Remove(node);
         }
 
-        // Deletes the folder and the nodes within it
-        public void DeleteFolder()
+        public void MoveNode(Folder targetFolder, Node node)
         {
-            // recursiion to delete 
-            foreach (Node node in Nodes)
-            {
-                if (node is Folder folder)
-                {
-                    folder.DeleteFolder();
-                }
-            }
-
-            // Remove the folder from its parent folder
-            ParentFolder.RemoveNode(this);
+            Nodes.Remove(node);
+            targetFolder.Nodes.Add(node);
         }
 
-        // Moves the folder and all its contents to a new parent folder
-        public void MoveFolder(Folder newParent)
+        public List<Node> SearchNode(string searchString)
         {
-            // Remove the folder from the old parent folder and add it to the new parent folder
-            ParentFolder.RemoveNode(this);
+            List<Node> searchResults = new List<Node>();
 
-            newParent.AddNode(this);
-          
-            foreach (Node node in Nodes)
+            foreach (var node in Nodes)
             {
+                if (node.Name.Contains(searchString))
+                {
+                    searchResults.Add(node);
+                }
+
+                // Recursion to search nodes in other folders down the hierarchy
                 if (node is Folder folder)
                 {
-                    folder.MoveFolder(this);
+                    searchResults.AddRange(folder.SearchNode(searchString));
                 }
             }
+
+            return searchResults;
         }
     }
 }
